@@ -27,7 +27,9 @@ module Rack
     def request(uri, env)
       env["HTTP_COOKIE"] ||= cookie_jar.for(uri)
       @last_request = Rack::Request.new(env)
-      status, headers, body = @app.call(@last_request.env)
+
+      app = @app.is_a?(Proc) ? @app.call : @app
+      status, headers, body = app.call(@last_request.env)
 
       @last_response = MockResponse.new(status, headers, body, env["rack.errors"].flush)
       body.close if body.respond_to?(:close)
